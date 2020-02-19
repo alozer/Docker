@@ -1,0 +1,92 @@
+
+
+#Docker custom user-network oluþturma
+
+docker network create efatura-cloud-dev
+
+**********************
+
+#Mongo Container Docker start
+
+docker run --name efatura-cloud-mongo-dev --network efatura-cloud-dev --publish 27017:27017 --detach mongo:4.0.7-xenial
+
+**********************
+ 
+#Mongo Express Container Docker start
+
+# Eðer debug modda açmak istiyorsan
+docker run --name efatura-mongo-express-dev -it --rm -e ME_CONFIG_MONGODB_SERVER=efatura-cloud-mongo-dev --network efatura-cloud-dev --publish 8081:8081 mongo-express
+
+# Eðer arka planda açmak istiyorsan
+docker run --name efatura-mongo-express-dev -e ME_CONFIG_MONGODB_SERVER=efatura-cloud-mongo-dev --network efatura-cloud-dev --detach --publish 8081:8081 mongo-express
+
+**********************
+
+
+#Tomcat Container Docker start
+
+docker run --name efatura-tomcat-dev --network efatura-cloud-dev --publish 8888:8080 --publish 4000:4000 --detach tomcat:9.0.16-jre8-alpine
+
+
+#Mongo Container Docker start
+
+docker run --name mongo-dev --network efatura-cloud-dev --publish 27017:27017 --detach -v /home/efatura-cloud/mongo-data:/data/db mongo
+
+**********************
+ 
+#Mongo Express Container Docker start
+
+# Eðer debug modda açmak istiyorsan
+docker run --name efatura-mongo-express-dev -it --rm -e ME_CONFIG_MONGODB_SERVER=efatura-cloud-mongo-dev --network efatura-cloud-dev --publish 8081:8081 mongo-express
+
+# Eðer arka planda açmak istiyorsan
+docker run --name efatura-mongo-express-dev -e ME_CONFIG_MONGODB_SERVER=efatura-cloud-mongo-dev --network efatura-cloud-dev --detach --publish 8081:8081 mongo-express
+
+**********************
+
+#Vue.js Docker container oluþturma
+
+docker build -t cloud-efatura/tomcat .
+
+#Tomcat Docker container baþlatma (customdan)
+
+docker run --name tomcat-dev --network efatura-cloud-dev --publish 9999:8080 --detach cloud-efatura/tomcat
+
+#Tomcat Docker container baþlatma (standarttan)
+
+docker run --name efatura-tomcat-dev --network efatura-cloud-dev --publish 8888:8080 --detach tomcat:9.0.26-jdk8-openjdk
+
+**********************
+
+#Node Container Docker start
+
+docker run --name efatura-node-dev --network efatura-cloud-dev --detach node:latest
+
+# debug mode
+docker run --name efatura-node-dev -it --rm --network efatura-cloud-dev node:latest
+
+**********************
+
+#Docker içinde gezinmek için
+
+docker exec -it efatura-cloud-tomcat-dev bash
+
+#Bash hata veriyorsa /bin/sh ile deneyebilirsin
+
+docker exec -it efatura-vuejs-dev /bin/sh
+
+**********************
+
+#Docker containera dosya kopyalama
+
+docker cp /home/cloud-efatura/efatura-internal-service.war efatura-tomcat-dev:/usr/local/tomcat/webapps/
+
+#Vue.js Docker container oluþturma
+
+docker build -t cloud-efatura/dockerize-vuejs-app .
+
+#Vue.js container baþlatma
+
+docker run --name vuejs-dev -v ${PWD}:/app -v /app/node_modules --network efatura-cloud-dev --publish 5000:5000 --rm cloud-efatura/dockerize-vuejs-app
+
+*************************
